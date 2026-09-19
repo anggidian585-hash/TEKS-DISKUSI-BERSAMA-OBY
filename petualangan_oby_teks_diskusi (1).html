@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Oby: Teks Diskusi!</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Nunito, Fredoka One, and Montserrat -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&family=Montserrat:wght@800&display=swap" rel="stylesheet">
+    <!-- Load Tone.js for Sound Effects & Music -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'],
+                        heading: ['Fredoka One', 'cursive'],
+                        kahoot: ['Montserrat', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#E21B3C',   // Kahoot Red (More accurate)
+                        secondary: '#1368CE', // Kahoot Blue
+                        accent: '#D89E00',    // Kahoot Yellow (Mustard-ish)
+                        success: '#26890C',   // Kahoot Green
+                        dark: '#333333', 
+                        light: '#F2F2F2',
+                        sky: '#4D96FF',
+                        oby: '#FF9F1C'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #F0F4F8;
+            background-image: 
+                radial-gradient(#CBD5E1 2px, transparent 2px),
+                radial-gradient(#94A3B8 2px, transparent 2px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+            color: #333333;
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .font-heading { font-family: 'Fredoka One', cursive; letter-spacing: 1px; }
+        .font-kahoot { font-family: 'Montserrat', sans-serif; }
+
+        .blob-card {
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+            border: 6px solid #333333;
+            box-shadow: 8px 8px 0px rgba(51, 51, 51, 1);
+            transition: all 0.3s ease;
+        }
+        
+        .blob-image {
+             border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+             border: 5px solid #333333;
+             overflow: hidden;
+        }
+
+        @keyframes morph {
+            0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+            50% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+        }
+        .animate-morph { animation: morph 5s ease-in-out infinite; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(-3deg); }
+            50% { transform: translateY(-20px) rotate(3deg); }
+        }
+        .floating { animation: float 3.5s ease-in-out infinite; }
+        
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-5deg) scale(1); }
+            50% { transform: rotate(5deg) scale(1.1); }
+        }
+        .wiggling { animation: wiggle 1.2s ease-in-out infinite; }
+
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.5) translateY(50px); }
+            70% { transform: scale(1.05) translateY(-10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        
+        @keyframes slideUpFade {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Sections */
+        .section-hidden { display: none !important; }
+        .section-active { display: flex; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        .btn-3d {
+            border: 4px solid #333333;
+            box-shadow: 0 8px 0px #333333;
+            border-radius: 99px;
+            transition: all 0.1s;
+            text-transform: uppercase;
+            font-family: 'Fredoka One', cursive;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-3d:active {
+            transform: translateY(8px);
+            box-shadow: 0 0px 0px #333333;
+        }
+
+        /* Interactive Accordion Items */
+        .expand-item {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .expand-item:hover { transform: scale(1.01) translateY(-2px); z-index: 10; position: relative; }
+        .expand-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .expand-item.active .expand-content { max-height: 800px; }
+        .expand-item.active .icon-toggle { transform: rotate(180deg); background-color: #E21B3C; color: white;}
+
+        .kahoot-btn {
+            border-radius: 12px;
+            box-shadow: 0 8px 0px rgba(0,0,0,0.2);
+            transition: all 0.1s;
+            position: relative;
+            overflow: hidden;
+            border: none;
+            display: flex;
+            align-items: center;
+            padding: 1.5rem;
+            color: white;
+            cursor: pointer;
+            z-index: 1;
+        }
+        .kahoot-btn::before {
+            content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0); transition: background 0.2s; z-index: -1;
+        }
+        .kahoot-btn:hover:not(:disabled)::before { background: rgba(0,0,0,0.1); }
+        .kahoot-btn:active:not(:disabled) {
+            transform: translateY(8px);
+            box-shadow: 0 0 0 rgba(0,0,0,0) !important;
+        }
+        .kahoot-btn:disabled { cursor: not-allowed; }
+        
+        .shape-icon {
+            width: 45px; height: 45px;
+            background-color: white;
+            margin-right: 20px;
+            display: flex; justify-content: center; align-items: center;
+            flex-shrink: 0;
+            box-shadow: inset 0 -3px 0 rgba(0,0,0,0.2);
+        }
+        .shape-triangle { clip-path: polygon(50% 10%, 0% 90%, 100% 90%); }
+        .shape-diamond { clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
+        .shape-circle { border-radius: 50%; }
+        .shape-square { border-radius: 8px; }
+
+        .kahoot-btn.correct-ans {
+            background-color: #66BF39 !important; /* Brighter Kahoot Green */
+            box-shadow: 0 0 30px rgba(102, 191, 57, 0.8) !important;
+            animation: pulse-correct 0.5s ease-in-out;
+            z-index: 10;
+        }
+        .kahoot-btn.wrong-ans {
+            background-color: #FF3355 !important; 
+            animation: shake 0.4s;
+        }
+        .kahoot-btn.dimmed {
+            opacity: 0.4;
+            transform: scale(0.95);
+            box-shadow: 0 2px 0px rgba(0,0,0,0.1) !important;
+        }
+
+        @keyframes pulse-correct {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-15px); }
+            40%, 80% { transform: translateX(15px); }
+        }
+
+        .status-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding-right: 20px;
+            background: rgba(0,0,0,0.15);
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+        .kahoot-btn.correct-ans .status-overlay, .kahoot-btn.wrong-ans .status-overlay { opacity: 1; }
+        
+        .status-icon {
+            font-size: 3.5rem;
+            transform: scale(0);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3));
+        }
+        .kahoot-btn.correct-ans .status-icon.check { transform: scale(1); color: white; display: block; }
+        .kahoot-btn.wrong-ans .status-icon.cross { transform: scale(1); color: white; display: block; }
+        .kahoot-btn .status-icon { display: none; } /* Hide initially */
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 12px; }
+        ::-webkit-scrollbar-track { background: #e2e8f0; }
+        ::-webkit-scrollbar-thumb { background: #333333; border-radius: 10px; border: 3px solid #e2e8f0; }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row h-screen overflow-hidden text-dark">
+
+    <div id="start-overlay" class="absolute inset-0 bg-sky/95 backdrop-blur-md z-50 flex flex-col items-center justify-center text-center p-6 transition-opacity duration-700">
+        <!-- Confetti on start -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-50">
+            <div class="absolute top-10 left-10 text-6xl floating">🎉</div>
+            <div class="absolute top-20 right-20 text-5xl floating" style="animation-delay: 1s">🎈</div>
+            <div class="absolute bottom-20 left-1/4 text-6xl floating" style="animation-delay: 0.5s">✨</div>
+        </div>
+        
+        <div class="bg-white p-10 rounded-[3rem] border-8 border-dark max-w-xl w-full shadow-[15px_15px_0_#333333] relative z-10 slideUpFade">
+            <div class="absolute -top-24 left-1/2 transform -translate-x-1/2 w-48 h-48 bg-accent blob-image flex items-center justify-center text-[7rem] border-8 border-dark floating z-20 shadow-lg">
+                🦉
+            </div>
+            <h2 class="font-heading text-5xl mb-4 text-primary mt-16 wiggling inline-block">Hai! Aku Oby!</h2>
+            <div class="bg-sky/20 border-4 border-dashed border-sky rounded-2xl p-4 mb-8">
+                <p class="font-bold text-gray-800 text-2xl leading-relaxed">
+                    Siap belajar teks diskusi?<br>
+                    <span class="text-primary font-black animate-pulse">Nyalakan volume suara ya!</span><br>
+                    Oby bakal nemenin kamu ngobrol!
+                </p>
+            </div>
+            <button onclick="startApp()" class="btn-3d bg-success text-white text-4xl py-5 px-12 w-full flex items-center justify-center gap-4 hover:scale-105">
+                <i class="fas fa-play"></i> GAS MULAI!
+            </button>
+        </div>
+    </div>
+
+    <main class="flex-1 overflow-y-auto h-full p-4 md:p-8 relative order-1 z-10" id="main-scroll">
+        
+        <!-- SECTION: BERANDA -->
+        <section id="beranda" class="section-active min-h-full flex-col items-center justify-center py-10 relative">
+            <div class="w-full max-w-5xl relative mt-16">
+                <!-- Mascot Interactive -->
+                <div class="absolute -top-32 left-1/2 transform -translate-x-1/2 z-20 cursor-pointer group" onclick="playMascotInteraction()">
+                    <div class="w-56 h-56 bg-oby blob-card animate-morph flex items-center justify-center text-[7rem] border-[8px] group-hover:bg-accent transition-colors shadow-2xl relative">
+                        🦉
+                        <!-- Pulse ring -->
+                        <div class="absolute inset-0 rounded-full border-4 border-accent animate-ping opacity-50 z-[-1]"></div>
+                    </div>
+                    <div class="absolute top-4 -right-20 bg-white border-4 border-dark rounded-2xl px-5 py-3 font-black text-xl rotate-12 shadow-[6px_6px_0_#333333] animate-bounce whitespace-nowrap">
+                        Pencet Oby!👆
+                    </div>
+                </div>
+
+                <!-- Main Welcome Card -->
+                <div class="bg-white rounded-[3rem] p-10 pt-36 text-center relative z-10 mt-10 border-8 border-dark shadow-[20px_20px_0_#4ECDC4]">
+                    <h1 class="font-heading text-5xl md:text-7xl text-dark leading-tight mb-8">
+                        Petualangan <span class="text-primary inline-block transform -rotate-3 wiggling drop-shadow-md">Teks Diskusi</span>
+                    </h1>
+                    
+                    <div class="bg-gray-100 border-4 border-dark p-8 rounded-3xl mb-10 relative shadow-inner">
+                        <div class="absolute -top-6 -left-6 text-5xl transform -rotate-12 bg-white rounded-full border-4 border-dark p-2">💬</div>
+                        <p class="text-3xl font-bold text-gray-700 leading-snug" id="oby-dialogue">
+                            "Halo kawan! Udah siap jadi jagoan debat buat ujian nanti? Yuk, kita mulai petualangannya bareng Oby!"
+                        </p>
+                    </div>
+                    
+                    <button onclick="nav('materi')" class="btn-3d bg-secondary text-white text-3xl py-5 px-12 transform hover:scale-105 transition-transform">
+                        <i class="fas fa-rocket mr-3"></i> Meluncur ke Materi!
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="materi" class="section-hidden min-h-full py-10 max-w-5xl mx-auto flex-col">
+            <div class="flex items-center gap-4 mb-10 justify-center">
+                <div class="text-7xl floating">📚</div>
+                <h2 class="font-heading text-5xl md:text-6xl text-dark bg-white border-8 border-dark px-10 py-4 rounded-3xl transform -rotate-2 shadow-[10px_10px_0_#FF9F1C]">Buku Pintar Oby</h2>
+            </div>
+
+            <!-- Pengertian -->
+            <div class="expand-item bg-white rounded-[2rem] border-[5px] border-dark shadow-[8px_8px_0_#333333] mb-8 overflow-hidden group" onclick="toggleMateri(this, 'Halo teman-teman! Teks diskusi itu ibarat kita lagi musyawarah. Ada pendapat yang pro atau setuju, dan ada yang kontra atau menolak. Tujuannya buat nyari jalan keluar atau kesimpulan yang paling pas!')">
+                <div class="p-6 md:p-8 bg-accent group-hover:bg-[#FFD166] flex justify-between items-center transition-colors">
+                    <h3 class="font-heading text-3xl md:text-4xl text-dark flex items-center gap-4">
+                        <span class="bg-white w-16 h-16 flex items-center justify-center rounded-full border-4 border-dark text-3xl shadow-sm">🤔</span> 
+                        Apa Sih Teks Diskusi?
+                    </h3>
+                    <div class="bg-white rounded-full w-14 h-14 flex items-center justify-center border-4 border-dark transition-colors icon-toggle">
+                        <i class="fas fa-chevron-down text-3xl"></i>
+                    </div>
+                </div>
+                <div class="expand-content bg-white border-t-[5px] border-dark">
+                    <div class="p-8 md:p-10 font-bold text-2xl text-gray-700 flex flex-col md:flex-row gap-10 items-center">
+                        <div class="flex-1 space-y-6 leading-relaxed">
+                            <p>Bayangin kamu dan teman-teman sekelas lagi rapat nentuin tempat study tour. Ada yang setuju ke Pantai (<span class="text-success font-black">PRO</span>), ada yang nolak maunya ke Gunung (<span class="text-primary font-black">KONTRA</span>).</p>
+                            <div class="bg-sky/10 p-6 rounded-3xl border-4 border-dashed border-sky text-dark relative">
+                                <span class="absolute -top-4 -right-4 text-4xl animate-bounce">💡</span>
+                                Nah, <span class="text-primary font-black bg-yellow-200 px-2 rounded">Teks Diskusi</span> adalah tulisan yang isinya menyajikan dua pendapat berbeda (Pro dan Kontra) terhadap suatu masalah, lalu diakhiri dengan simpulan/jalan keluar!
+                            </div>
+                        </div>
+                        <div class="w-56 h-56 bg-light rounded-full border-8 border-dark flex-shrink-0 flex items-center justify-center text-7xl shadow-inner floating">
+                            🗣️⚖️
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ciri-ciri & Trik -->
+            <div class="grid md:grid-cols-2 gap-8 mb-10">
+                <div class="expand-item bg-white rounded-[2rem] border-[5px] border-dark shadow-[8px_8px_0_#333333] overflow-hidden group" onclick="toggleMateri(this, 'Ciri khasnya, pasti ada isu, lalu argumen pendukung, argumen penentang, dan simpulan. Jangan lupa ada kata hubung perlawanan seperti tetapi, atau namun.')">
+                    <div class="p-6 bg-[#4ECDC4] group-hover:bg-[#3dbdb4] flex justify-between items-center transition-colors">
+                        <h3 class="font-heading text-3xl text-dark flex items-center gap-3">
+                            <span class="bg-white p-3 rounded-full border-4 border-dark text-2xl">🔍</span> Ciri Khas
+                        </h3>
+                        <div class="bg-white rounded-full w-12 h-12 flex items-center justify-center border-4 border-dark icon-toggle"><i class="fas fa-plus text-2xl"></i></div>
+                    </div>
+                    <div class="expand-content bg-white">
+                        <ul class="p-8 font-bold text-gray-700 list-disc list-inside space-y-4 text-xl leading-relaxed">
+                            <li>Struktur jelas: Isu - Argumen - Simpulan.</li>
+                            <li>Pakai <span class="text-primary font-black">konjungsi perlawanan</span> (tetapi, namun, sebaliknya).</li>
+                            <li>Pakai kata evaluatif (sangat, penting).</li>
+                            <li>Sifatnya <span class="text-sky font-black">argumentatif</span>.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="expand-item bg-white rounded-[2rem] border-[5px] border-dark shadow-[8px_8px_0_#333333] overflow-hidden group" onclick="toggleMateri(this, 'Kalau mau membantah pendapat orang, ingat trik Oby! Jangan pakai emosi. Gunakan kata maaf sebelumnya, biar diskusinya tetap santun.')">
+                    <div class="p-6 bg-[#FF6B6B] text-white group-hover:bg-[#fa5555] flex justify-between items-center transition-colors">
+                        <h3 class="font-heading text-3xl flex items-center gap-3 drop-shadow-md">
+                            <span class="bg-white text-dark p-3 rounded-full border-4 border-dark text-2xl">💡</span> Trik Santun
+                        </h3>
+                        <div class="bg-white text-dark rounded-full w-12 h-12 flex items-center justify-center border-4 border-dark icon-toggle"><i class="fas fa-plus text-2xl"></i></div>
+                    </div>
+                    <div class="expand-content bg-white text-dark">
+                        <div class="p-8 font-bold text-gray-700 text-xl leading-relaxed">
+                            Jangan nge-gas! Gunakan kalimat sakti ini:<br><br>
+                            <span class="bg-yellow-200 px-3 py-2 rounded-lg border-2 border-dark inline-block mb-3 wiggling">"Maaf, saya kurang sependapat karena..."</span><br>
+                            <span class="bg-green-200 px-3 py-2 rounded-lg border-2 border-dark inline-block wiggling" style="animation-delay: 0.5s">"Pendapatmu bagus, tapi menurut saya..."</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-[3rem] border-[5px] border-dark p-8 md:p-10 mb-10 shadow-[10px_10px_0_#333333]">
+                <h3 class="font-heading text-4xl text-dark mb-4 text-center">Bentuk-Bentuk Diskusi</h3>
+                <p class="text-center font-bold text-xl text-primary mb-8 animate-pulse">👉 Klik kartunya untuk melihat penjelasan & gambar nyata! 👈</p>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Simposium (Real Image) -->
+                    <div class="expand-item bg-sky rounded-3xl border-4 border-dark overflow-hidden flex flex-col group" onclick="toggleMateri(this, 'Ini Simposium! Bayangkan beberapa ahli gantian pidato membahas satu topik yang sama dari berbagai sudut pandang.')">
+                        <div class="p-5 text-white text-center flex-1 group-hover:bg-blue-500 transition-colors">
+                            <h4 class="font-heading text-2xl drop-shadow-md">👥 Simposium</h4>
+                        </div>
+                        <div class="expand-content bg-white">
+                            <div class="p-4 text-center">
+                                <div class="border-4 border-dark rounded-2xl overflow-hidden mb-3 bg-gray-200 h-40">
+                                    <img src="https://images.unsplash.com/photo-1551818255-e6e10975bc17?auto=format&fit=crop&w=400&h=300&q=80" alt="Simposium Nyata" class="w-full h-full object-cover hover:scale-110 transition-transform duration-500">
+                                </div>
+                                <p class="text-lg font-bold text-gray-700 leading-tight">Beberapa ahli berpidato gantian bahas 1 topik di depan audiens.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seminar (Real Image) -->
+                    <div class="expand-item bg-primary rounded-3xl border-4 border-dark overflow-hidden flex flex-col group" onclick="toggleMateri(this, 'Seminar adalah pertemuan ilmiah. Ada pakar yang mempresentasikan makalah untuk memecahkan suatu masalah bersama audiens.')">
+                        <div class="p-5 text-white text-center flex-1 group-hover:bg-red-600 transition-colors">
+                            <h4 class="font-heading text-2xl drop-shadow-md">🎓 Seminar</h4>
+                        </div>
+                        <div class="expand-content bg-white">
+                            <div class="p-4 text-center">
+                                <div class="border-4 border-dark rounded-2xl overflow-hidden mb-3 bg-gray-200 h-40">
+                                    <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=400&h=300&q=80" alt="Seminar Nyata" class="w-full h-full object-cover hover:scale-110 transition-transform duration-500">
+                                </div>
+                                <p class="text-lg font-bold text-gray-700 leading-tight">Pertemuan ilmiah dimana pakar bahas masalah & presentasi.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Panel (Real Image) -->
+                    <div class="expand-item bg-accent rounded-3xl border-4 border-dark overflow-hidden flex flex-col group" onclick="toggleMateri(this, 'Diskusi panel itu seru, mirip talkshow di TV! Ada beberapa panelis yang berdiskusi dan disaksikan oleh banyak penonton.')">
+                        <div class="p-5 text-dark text-center flex-1 group-hover:bg-yellow-500 transition-colors">
+                            <h4 class="font-heading text-2xl drop-shadow-md">📺 Diskusi Panel</h4>
+                        </div>
+                        <div class="expand-content bg-white">
+                            <div class="p-4 text-center">
+                                <div class="border-4 border-dark rounded-2xl overflow-hidden mb-3 bg-gray-200 h-40">
+                                    <img src="https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=400&h=300&q=80" alt="Diskusi Panel Nyata" class="w-full h-full object-cover hover:scale-110 transition-transform duration-500">
+                                </div>
+                                <p class="text-lg font-bold text-gray-700 leading-tight">Beberapa panelis berdiskusi terbuka disaksikan banyak penonton.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Lokakarya (Real Image) -->
+                    <div class="expand-item bg-success rounded-3xl border-4 border-dark overflow-hidden flex flex-col group" onclick="toggleMateri(this, 'Kalau Lokakarya, pesertanya kumpul, diskusi, lalu langsung praktek membuat sesuatu atau karya nyata!')">
+                        <div class="p-5 text-white text-center flex-1 group-hover:bg-green-600 transition-colors">
+                            <h4 class="font-heading text-2xl drop-shadow-md">🛠️ Lokakarya</h4>
+                        </div>
+                        <div class="expand-content bg-white">
+                            <div class="p-4 text-center">
+                                <div class="border-4 border-dark rounded-2xl overflow-hidden mb-3 bg-gray-200 h-40">
+                                    <img src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=400&h=300&q=80" alt="Lokakarya Nyata" class="w-full h-full object-cover hover:scale-110 transition-transform duration-500">
+                                </div>
+                                <p class="text-lg font-bold text-gray-700 leading-tight">Kumpul, diskusi solusi praktis, lalu langsung praktek bikin karya.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 text-center">
+                 <button onclick="nav('struktur')" class="btn-3d bg-sky text-white text-3xl py-5 px-12 hover:bg-blue-500">
+                    Lanjut ke Struktur Bangunan! <i class="fas fa-arrow-right ml-3"></i>
+                </button>
+            </div>
+        </section>
+
+        <section id="struktur" class="section-hidden min-h-full py-10 max-w-5xl mx-auto flex-col">
+            <div class="text-center mb-12">
+                <h2 class="font-heading text-5xl md:text-6xl text-dark mb-6">
+                    <span class="text-7xl floating inline-block mb-4">🏗️</span><br>Struktur Teks Diskusi
+                </h2>
+                <div class="bg-accent p-5 border-4 border-dark rounded-full inline-block shadow-[6px_6px_0_#333333] animate-pulse">
+                    <p class="font-black text-2xl px-6 text-dark">👉 Klik kotak nomornya biar Oby jelasin! 👈</p>
+                </div>
+            </div>
+
+            <div class="space-y-8 relative pl-6 md:pl-10">
+                <!-- Connecting Line Base -->
+                <div class="absolute left-16 md:left-[5.5rem] top-10 bottom-10 w-4 bg-gray-300 rounded-full z-0 border-x-2 border-dark"></div>
+
+                <div class="flex items-center gap-6 cursor-pointer transform transition-transform hover:translate-x-4 z-10 relative group" onclick="toggleSpeech('Bagian pertama Isu. Ini adalah pembukaan, tempat kita ngenalin masalah atau topik apa yang bakal didebatin.')">
+                    <div class="w-24 h-24 md:w-28 md:h-28 bg-dark text-white rounded-full flex items-center justify-center font-heading text-6xl border-8 border-white shadow-[0_0_0_5px_#333333] shrink-0 group-hover:scale-110 transition-transform">1</div>
+                    <div class="bg-white p-6 md:p-8 border-[5px] border-dark rounded-3xl w-full shadow-[8px_8px_0_#333333] group-hover:bg-gray-50">
+                        <h3 class="font-heading text-4xl text-sky mb-3 drop-shadow-sm">ISU (Masalah)</h3>
+                        <p class="font-bold text-gray-700 text-2xl">Pengantar / pendahuluan tentang topik yang jadi bahan perdebatan.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-6 cursor-pointer transform transition-transform hover:translate-x-4 z-10 relative group" onclick="toggleSpeech('Kedua, Argumen Mendukung. Ini dari tim PRO yang setuju sama masalahnya. Mereka ngasih alasan dan bukti yang kuat.')">
+                    <div class="w-24 h-24 md:w-28 md:h-28 bg-success text-white rounded-full flex items-center justify-center font-heading text-6xl border-8 border-white shadow-[0_0_0_5px_#26890C] shrink-0 group-hover:scale-110 transition-transform">2</div>
+                    <div class="bg-white p-6 md:p-8 border-[5px] border-dark rounded-3xl w-full shadow-[8px_8px_0_#26890C] group-hover:bg-green-50">
+                        <h3 class="font-heading text-4xl text-success mb-3 drop-shadow-sm">ARGUMEN MENDUKUNG (Pro)</h3>
+                        <p class="font-bold text-gray-700 text-2xl">Pendapat yang <strong>Setuju</strong> beserta alasan dan buktinya.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-6 cursor-pointer transform transition-transform hover:translate-x-4 z-10 relative group" onclick="toggleSpeech('Ketiga, Argumen Menentang. Nah ini tim KONTRA. Mereka nggak setuju dan berusaha ngebantah tim pro dengan alasan lain.')">
+                    <div class="w-24 h-24 md:w-28 md:h-28 bg-primary text-white rounded-full flex items-center justify-center font-heading text-6xl border-8 border-white shadow-[0_0_0_5px_#E21B3C] shrink-0 group-hover:scale-110 transition-transform">3</div>
+                    <div class="bg-white p-6 md:p-8 border-[5px] border-dark rounded-3xl w-full shadow-[8px_8px_0_#E21B3C] group-hover:bg-red-50">
+                        <h3 class="font-heading text-4xl text-primary mb-3 drop-shadow-sm">ARGUMEN MENENTANG (Kontra)</h3>
+                        <p class="font-bold text-gray-700 text-2xl">Pendapat yang <strong>Tidak Setuju</strong> (menolak) untuk membantah argumen pro.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-6 cursor-pointer transform transition-transform hover:translate-x-4 z-10 relative group" onclick="toggleSpeech('Terakhir Simpulan. Ini adalah jalan tengah atau penyelesaian yang paling adil buat kedua belah pihak.')">
+                    <div class="w-24 h-24 md:w-28 md:h-28 bg-accent text-dark rounded-full flex items-center justify-center font-heading text-6xl border-8 border-white shadow-[0_0_0_5px_#D89E00] shrink-0 group-hover:scale-110 transition-transform">4</div>
+                    <div class="bg-white p-6 md:p-8 border-[5px] border-dark rounded-3xl w-full shadow-[8px_8px_0_#D89E00] group-hover:bg-yellow-50">
+                        <h3 class="font-heading text-4xl text-[#D89E00] mb-3 drop-shadow-sm">SIMPULAN</h3>
+                        <p class="font-bold text-gray-700 text-2xl">Kesimpulan, jalan tengah, penyelesaian, atau saran dari permasalahan.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-20 text-center">
+                 <button onclick="nav('kuis')" class="btn-3d bg-primary text-white text-4xl py-6 px-16 hover:bg-red-600 shadow-[0_10px_0_#900] wiggling inline-block">
+                    GAS MAIN KUIS! <i class="fas fa-gamepad ml-3 text-5xl"></i>
+                </button>
+            </div>
+        </section>
+
+        <section id="kuis" class="section-hidden min-h-full py-4 flex-col justify-center max-w-6xl mx-auto w-full">
+            
+            <div class="bg-gray-100 p-3 md:p-8 rounded-[2.5rem] shadow-2xl border-[6px] border-gray-300 relative">
+                
+                <!-- Game Header -->
+                <div class="flex justify-between items-center mb-6 bg-white p-5 rounded-2xl border-4 border-gray-300 shadow-sm">
+                    <div class="font-heading text-3xl md:text-4xl text-dark flex items-center gap-4">
+                        <span class="text-5xl animate-spin" style="animation-duration: 3s;">🕹️</span> Kuis Oby
+                    </div>
+                    <div class="font-kahoot font-black text-2xl md:text-3xl text-dark bg-gray-200 px-6 py-3 rounded-xl border-4 border-gray-400">
+                        SKOR: <span id="score-display" class="text-4xl text-secondary">0</span>
+                    </div>
+                </div>
+
+                <!-- Game Screen Area -->
+                <div class="bg-white rounded-[2rem] border-[5px] border-dark p-6 md:p-10 relative min-h-[600px] flex flex-col overflow-hidden shadow-inner">
+                    
+                    <!-- Intro Screen -->
+                    <div id="quiz-intro" class="text-center my-auto relative z-10">
+                        <div class="text-[9rem] mb-6 floating drop-shadow-xl">🏆</div>
+                        <h3 class="font-heading text-5xl md:text-6xl text-dark mb-6">Ujian Teks Diskusi? <br><span class="text-primary wiggling inline-block mt-2">KECIL!</span></h3>
+                        <div class="bg-gray-50 p-8 rounded-3xl mb-10 max-w-3xl mx-auto border-4 border-dashed border-gray-400">
+                            <p class="font-bold text-2xl text-gray-700 leading-relaxed">
+                                Jawab 10 teka-teki Oby dengan cepat!<br>
+                                Suara <span class="text-success font-black text-3xl">CLING 🟢</span> kalau benar.<br>
+                                Suara <span class="text-primary font-black text-3xl">TETOT 🔴</span> kalau salah.
+                            </p>
+                        </div>
+                        <button onclick="startQuizEngine()" class="btn-3d bg-success text-white text-4xl md:text-5xl py-6 px-16 shadow-[0_12px_0_#1e6b0a] hover:bg-green-600 hover:scale-105">
+                            START GAME!
+                        </button>
+                    </div>
+
+                    <!-- Question Screen (Kahoot Style) -->
+                    <div id="quiz-play" class="hidden flex-col h-full z-10 -m-6 md:-m-10 p-6 md:p-10 bg-gray-50 rounded-[1.5rem]">
+                        
+                        <!-- Question Header -->
+                        <div class="bg-white border-b-8 border-gray-200 p-8 rounded-t-3xl mb-8 text-center shadow-sm relative">
+                            <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 w-20 h-20 bg-accent rounded-full flex items-center justify-center text-5xl border-4 border-white shadow-lg animate-bounce z-20">
+                                🦉
+                            </div>
+                            <span class="text-xl font-kahoot font-black text-gray-400 block mb-3 tracking-widest uppercase mt-4">Pertanyaan <span id="q-num">1</span> dari 10</span>
+                            <h4 id="q-text" class="font-kahoot font-black text-3xl md:text-5xl text-dark leading-tight">
+                                Loading question...
+                            </h4>
+                        </div>
+
+                        <!-- 4 Color Grid Options -->
+                        <div id="options-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 flex-1">
+                            <!-- Options Generated by JS -->
+                        </div>
+
+                        <!-- Next Button Panel -->
+                        <div class="mt-8 flex justify-between items-center h-20">
+                            <div id="feedback-text" class="font-heading text-4xl hidden"></div>
+                            <button id="btn-lanjut" onclick="nextQuestion()" class="hidden btn-3d bg-dark text-white text-3xl py-4 px-12 ml-auto hover:bg-gray-800">
+                                Lanjut <i class="fas fa-arrow-right ml-3"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Result Screen -->
+                    <div id="quiz-result-screen" class="hidden flex-col items-center justify-center h-full text-center z-10 my-auto">
+                        <div id="result-icon" class="text-[12rem] mb-6 animate-bounce drop-shadow-2xl">🥇</div>
+                        <h3 id="result-title" class="font-heading text-7xl mb-6"></h3>
+                        <div class="bg-gray-100 px-16 py-8 rounded-[3rem] border-8 border-gray-300 mb-10 shadow-inner">
+                            <p class="text-4xl font-kahoot font-black text-dark mb-4">Skor Akhir Kamu:</p>
+                            <p id="final-score" class="text-[7rem] text-secondary font-black drop-shadow-md leading-none">100</p>
+                        </div>
+                        
+                        <button onclick="resetQuizState()" class="btn-3d bg-accent text-dark text-3xl py-5 px-16 hover:bg-yellow-500">
+                            <i class="fas fa-redo-alt mr-3"></i> Main Lagi Yuk!
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <aside class="w-full md:w-80 bg-white border-t-8 md:border-t-0 md:border-l-8 border-dark flex flex-col md:h-full z-40 order-2 shrink-0 overflow-y-auto">
+        
+        <div class="bg-primary p-8 border-b-8 border-dark text-center hidden md:block relative overflow-hidden">
+            <div class="absolute -right-4 -top-4 opacity-20 text-7xl transform rotate-12">📝</div>
+            <h2 class="font-heading text-4xl text-white transform -rotate-3 drop-shadow-lg relative z-10 leading-tight">Teks Diskusi</h2>
+            <div class="bg-accent text-dark font-black px-5 py-2 rounded-full text-xl inline-block mt-4 border-4 border-dark shadow-[4px_4px_0_#333333] relative z-10 wiggling">
+                Kelas 9
+            </div>
+        </div>
+
+        <nav class="flex md:flex-col gap-4 p-4 md:p-6 overflow-x-auto md:overflow-visible flex-1">
+            <button onclick="nav('beranda')" id="nav-beranda" class="nav-btn btn-3d active bg-accent text-dark p-5 flex flex-col md:flex-row items-center gap-4 w-44 md:w-full shrink-0">
+                <span class="text-4xl drop-shadow-sm">🏠</span> 
+                <span class="font-bold text-xl md:text-2xl">Beranda</span>
+            </button>
+            
+            <button onclick="nav('materi')" id="nav-materi" class="nav-btn btn-3d bg-white text-dark p-5 flex flex-col md:flex-row items-center gap-4 w-44 md:w-full shrink-0">
+                <span class="text-4xl drop-shadow-sm">📖</span> 
+                <span class="font-bold text-xl md:text-2xl">Materi</span>
+            </button>
+            
+            <button onclick="nav('struktur')" id="nav-struktur" class="nav-btn btn-3d bg-white text-dark p-5 flex flex-col md:flex-row items-center gap-4 w-44 md:w-full shrink-0">
+                <span class="text-4xl drop-shadow-sm">🏗️</span> 
+                <span class="font-bold text-xl md:text-2xl">Struktur</span>
+            </button>
+
+            <button onclick="nav('kuis')" id="nav-kuis" class="nav-btn btn-3d bg-white text-dark p-5 flex flex-col md:flex-row items-center gap-4 w-48 md:w-full shrink-0 mt-auto md:mt-8 border-primary shadow-[0_8px_0_#E21B3C]">
+                <span class="text-5xl animate-bounce drop-shadow-sm">🎮</span> 
+                <span class="font-bold text-xl md:text-3xl text-primary">KUIS!</span>
+            </button>
+        </nav>
+    </aside>
+
+    <script>
+        let audioCtxStarted = false;
+        
+        // --- Web Speech API (Suara Orang Menjelaskan) ---
+        let currentUtterance = null;
+        function speak(text) {
+            if (!('speechSynthesis' in window)) return;
+            
+            // Stop current speech if speaking
+            window.speechSynthesis.cancel();
+            
+            currentUtterance = new SpeechSynthesisUtterance(text);
+            currentUtterance.lang = 'id-ID';
+            currentUtterance.pitch = 1.2; // Slightly higher pitch for mascot feel
+            currentUtterance.rate = 1.0;  // Normal speed
+            currentUtterance.volume = 1;
+            
+            window.speechSynthesis.speak(currentUtterance);
+        }
+
+        // --- Tone.js Synthesizers ---
+        // UI Click (Pop)
+        const clickSynth = new Tone.MembraneSynth({ pitchDecay: 0.05, octaves: 2 }).toDestination();
+        clickSynth.volume.value = -8;
+
+        // "Tetot" (Wrong Answer) - Harsh Square waves descending
+        const tetotSynth = new Tone.PolySynth(Tone.Synth, {
+            oscillator: { type: "square" },
+            envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 0.5 }
+        }).toDestination();
+        tetotSynth.volume.value = -2;
+
+        // "Cling" (Correct Answer) - Bright Bell sound (Arpeggio)
+        const clingSynth = new Tone.PolySynth(Tone.Synth, {
+            oscillator: { type: "triangle" },
+            envelope: { attack: 0.01, decay: 0.3, sustain: 0, release: 0.8 }
+        }).toDestination();
+        clingSynth.volume.value = -5;
+
+        // Win Melody
+        const winSynth = new Tone.PolySynth(Tone.Synth, { oscillator: { type: "sine" } }).toDestination();
+        winSynth.volume.value = -5;
+
+        // --- Background Music (BGM) ---
+        const bgmSynth = new Tone.PolySynth(Tone.FMSynth, {
+            harmonicity: 3, modulationIndex: 10,
+            envelope: { attack: 0.1, decay: 0.2, sustain: 0.2, release: 1 }
+        }).toDestination();
+        bgmSynth.volume.value = -22;
+        
+        // Normal BGM: Relaxed, Rhythmic Chord Progression
+        const normalNotes = [
+            ["C4", "E4", "G4"], null, ["A3", "C4", "E4"], null, 
+            ["F3", "A3", "C4"], null, ["G3", "B3", "D4"], null
+        ];
+        const normalBgmSeq = new Tone.Sequence((time, note) => {
+            if(note) bgmSynth.triggerAttackRelease(note, "8n", time);
+        }, normalNotes, "4n");
+
+        // Quiz BGM: Kahoot Vibe (Fast, Driving Bass, Tense)
+        const quizBassSynth = new Tone.Synth({
+            oscillator: { type: "sawtooth" },
+            envelope: { attack: 0.01, decay: 0.2, sustain: 0, release: 0.1 }
+        }).toDestination();
+        quizBassSynth.volume.value = -12;
+
+        const quizNotes = ["C3", "C3", "Eb3", "C3", "F3", "Eb3", "C3", "G2"];
+        const quizBgmSeq = new Tone.Sequence((time, note) => {
+            quizBassSynth.triggerAttackRelease(note, "16n", time);
+        }, quizNotes, "8n");
+
+        async function startApp() {
+            await Tone.start();
+            audioCtxStarted = true;
+            
+            // Dummy speech to unlock Audio Context on mobile
+            speak(""); 
+
+            // Hide overlay smoothly
+            const overlay = document.getElementById('start-overlay');
+            overlay.classList.remove('slideUpFade');
+            overlay.style.opacity = '0';
+            setTimeout(() => { overlay.style.display = 'none'; }, 700);
+            
+            playClick();
+            
+            // Start Normal BGM
+            Tone.Transport.bpm.value = 110;
+            Tone.Transport.start();
+            normalBgmSeq.start(0);
+            
+            // Mascot Greeting Voice
+            setTimeout(() => { 
+                speak("Halo! Selamat datang di petualangan belajar teks diskusi bareng Oby! Jangan lupa catat yang penting ya!"); 
+                // Visual feedback on dialogue
+                const d = document.getElementById('oby-dialogue').parentElement;
+                d.classList.remove('shadow-inner');
+                void d.offsetWidth; 
+                d.classList.add('animate-pulse');
+                setTimeout(() => d.classList.remove('animate-pulse'), 5000);
+            }, 800);
+        }
+
+        function playClick() {
+            if (audioCtxStarted) clickSynth.triggerAttackRelease("C5", "32n");
+        }
+
+        function playMascotInteraction() {
+            playClick();
+            const quotes = [
+                "Ayo semangat belajarnya! Kamu pasti bisa!",
+                "Teks diskusi itu seru loh, kayak debat tapi santun!",
+                "Cari tahu apa itu isu, argumen pro, dan kontra ya!",
+                "Pencet menu di samping buat mulai belajarnya!"
+            ];
+            const quote = quotes[Math.floor(Math.random() * quotes.length)];
+            document.getElementById('oby-dialogue').innerText = `"${quote}"`;
+            speak(quote);
+        }
+
+        // Wrapper for Speech on interactions
+        function toggleSpeech(text) {
+            playClick();
+            speak(text);
+        }
+
+        function toggleMateri(element, speechText) {
+            playClick();
+            
+            const isActive = element.classList.contains('active');
+            
+            // Close all other accordions in the same parent if needed (optional, keeping it simple here)
+            // document.querySelectorAll('.expand-item').forEach(el => el.classList.remove('active'));
+
+            if (!isActive) {
+                element.classList.add('active');
+                if(speechText) speak(speechText);
+            } else {
+                element.classList.remove('active');
+                window.speechSynthesis.cancel(); // Stop speaking if closed
+            }
+        }
+
+        function nav(targetId) {
+            playClick();
+            window.speechSynthesis.cancel(); // Stop speech on navigation
+            
+            // Hide all sections
+            document.querySelectorAll('section').forEach(s => s.classList.replace('section-active', 'section-hidden'));
+            
+            // Show target
+            document.getElementById(targetId).classList.replace('section-hidden', 'section-active');
+            
+            // Reset Nav Styles
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-accent', 'active');
+                btn.classList.add('bg-white');
+                if(btn.id === 'nav-kuis') {
+                    btn.classList.remove('bg-primary', 'text-white');
+                    btn.classList.add('bg-white', 'text-dark');
+                }
+            });
+            
+            // Active Nav Style
+            const activeBtn = document.getElementById('nav-' + targetId);
+            if(activeBtn) {
+                if(targetId === 'kuis') {
+                    activeBtn.classList.remove('bg-white', 'text-dark');
+                    activeBtn.classList.add('bg-primary', 'active', 'text-white');
+                } else {
+                    activeBtn.classList.remove('bg-white');
+                    activeBtn.classList.add('bg-accent', 'active');
+                }
+            }
+
+            // Music Management (Normal vs Quiz)
+            if (audioCtxStarted) {
+                if (targetId === 'kuis') {
+                    normalBgmSeq.stop();
+                    // Quiz BGM starts on "START GAME" button, not just entering nav
+                } else {
+                    quizBgmSeq.stop();
+                    normalBgmSeq.start();
+                    Tone.Transport.bpm.rampTo(110, 1);
+                }
+            }
+
+            document.getElementById('main-scroll').scrollTo(0,0);
+        }
+
+        const questionsData = [
+            { q: "Apa tujuan utama dari teks diskusi?", opt: ["Menceritakan dongeng", "Mencari jalan tengah (solusi)", "Memberikan berita terkini", "Menjelaskan resep makanan"], correct: 1 },
+            { q: "Pendapat yang MENDUKUNG sebuah isu disebut argumen...", opt: ["Isu", "Pro", "Kontra", "Simpulan"], correct: 1 },
+            { q: "Pendapat yang MENOLAK atau tidak setuju disebut argumen...", opt: ["Isu", "Pro", "Kontra", "Simpulan"], correct: 2 },
+            { q: "Kata hubung apa yang sering dipakai untuk beda pendapat?", opt: ["Karena", "Sehingga", "Namun / Tetapi", "Dan"], correct: 2 },
+            { q: "Cara santun saat tidak setuju dalam diskusi adalah...", opt: ["'Ngawur lu!'", "'Maaf, tapi saya kurang sependapat...'", "'Gak mungkin gitu!'", "Keluar dari ruangan"], correct: 1 },
+            { q: "Kata evaluatif yang sering muncul di teks diskusi contohnya...", opt: ["Buku", "Sangat penting", "Berlari", "Di mana"], correct: 1 },
+            { q: "Bagian paling akhir yang isinya jalan keluar disebut...", opt: ["Isu", "Argumen Pro", "Argumen Kontra", "Simpulan"], correct: 3 },
+            { q: "Sinonim (persamaan kata) dari pendapat PRO adalah...", opt: ["Menolak", "Netral", "Mendukung", "Abaikan"], correct: 2 },
+            { q: "Teks diskusi termasuk jenis teks yang...", opt: ["Fiksi", "Argumentatif", "Puisi", "Prosedur"], correct: 1 },
+            { q: "Ciri kebahasaan teks diskusi adalah...", opt: ["Banyak pantun", "Ada konjungsi perlawanan", "Tokohnya binatang", "Berisi angka matematika"], correct: 1 }
+        ];
+
+        // Kahoot Style Layout (Color, Shape)
+        const kahootStyles = [
+            { color: 'bg-primary', shape: 'shape-triangle' }, 
+            { color: 'bg-secondary', shape: 'shape-diamond' },
+            { color: 'bg-accent', shape: 'shape-circle' },    
+            { color: 'bg-success', shape: 'shape-square' }     
+        ];
+
+        let currQIndex = 0;
+        let pScore = 0;
+        let isQuestionAnswered = false;
+
+        function startQuizEngine() {
+            playClick();
+            
+            // Switch to intense Quiz Music
+            if (audioCtxStarted) {
+                normalBgmSeq.stop();
+                quizBgmSeq.start();
+                Tone.Transport.bpm.value = 140; // Fast!
+            }
+
+            document.getElementById('quiz-intro').classList.add('hidden');
+            document.getElementById('quiz-play').classList.remove('hidden');
+            document.getElementById('quiz-play').classList.add('flex');
+            
+            currQIndex = 0;
+            pScore = 0;
+            updateScoreText();
+            renderQuestion();
+            speak("Siap? Kuis dimulai!");
+        }
+
+        function renderQuestion() {
+            isQuestionAnswered = false;
+            document.getElementById('btn-lanjut').classList.add('hidden');
+            document.getElementById('feedback-text').classList.add('hidden');
+            
+            const data = questionsData[currQIndex];
+            document.getElementById('q-num').innerText = currQIndex + 1;
+            document.getElementById('q-text').innerText = data.q;
+            
+            // Read question
+            speak(data.q);
+            
+            const grid = document.getElementById('options-grid');
+            grid.innerHTML = '';
+            
+            data.opt.forEach((optionText, idx) => {
+                const style = kahootStyles[idx];
+                const btn = document.createElement('button');
+                
+                btn.className = `kahoot-btn ${style.color} font-kahoot font-bold text-2xl md:text-3xl text-left w-full h-full min-h-[140px]`;
+                
+                btn.innerHTML = `
+                    <div class="shape-icon ${style.shape}"></div>
+                    <span class="flex-1 drop-shadow-md leading-tight">${optionText}</span>
+                    <div class="status-overlay">
+                        <i class="fas fa-check status-icon check"></i>
+                        <i class="fas fa-times status-icon cross"></i>
+                    </div>
+                `;
+                
+                btn.onclick = () => handleAnswer(idx, btn);
+                grid.appendChild(btn);
+            });
+        }
+
+        function handleAnswer(selectedIdx, btnElement) {
+            if (isQuestionAnswered) return;
+            isQuestionAnswered = true;
+            window.speechSynthesis.cancel(); // Stop reading question
+            
+            const data = questionsData[currQIndex];
+            const isCorrect = (selectedIdx === data.correct);
+            const allBtns = document.querySelectorAll('.kahoot-btn');
+            
+            // UI Update: Disable all
+            allBtns.forEach((b, i) => {
+                b.disabled = true;
+                if(i !== selectedIdx && i !== data.correct) b.classList.add('dimmed');
+            });
+
+            const fbText = document.getElementById('feedback-text');
+            fbText.classList.remove('hidden');
+
+            if (isCorrect) {
+                // CORRECT: "Cling" Sound
+                if(audioCtxStarted) {
+                    const now = Tone.now();
+                    clingSynth.triggerAttackRelease(["C5", "E5", "G5"], "16n", now);
+                    clingSynth.triggerAttackRelease(["E5", "G5", "C6"], "8n", now + 0.1);
+                }
+                
+                btnElement.classList.add('correct-ans');
+                fbText.innerHTML = '<span class="text-success animate-bounce inline-block">BENAR! +10</span>';
+                speak("Benar!");
+                
+                pScore += 10;
+                updateScoreText();
+            } else {
+                // WRONG: "Tetot" Sound
+                if(audioCtxStarted) {
+                    const now = Tone.now();
+                    // Harsh interval descending
+                    tetotSynth.triggerAttackRelease(["F#3", "C3"], "16n", now);
+                    tetotSynth.triggerAttackRelease(["C3", "F#2"], "4n", now + 0.15);
+                }
+                
+                btnElement.classList.add('wrong-ans');
+                // Highlight the correct one so they learn
+                allBtns[data.correct].classList.add('correct-ans');
+                fbText.innerHTML = '<span class="text-primary animate-bounce inline-block">SALAH!</span>';
+                speak("Salah! Jawabannya adalah " + data.opt[data.correct]);
+            }
+
+            document.getElementById('btn-lanjut').classList.remove('hidden');
+        }
+
+        function updateScoreText() {
+            const scoreEl = document.getElementById('score-display');
+            scoreEl.innerText = pScore;
+            scoreEl.parentElement.classList.add('animate-bounce');
+            scoreEl.parentElement.classList.replace('bg-gray-200', 'bg-accent');
+            setTimeout(() => { 
+                scoreEl.parentElement.classList.remove('animate-bounce');
+                scoreEl.parentElement.classList.replace('bg-accent', 'bg-gray-200');
+            }, 600);
+        }
+
+        function nextQuestion() {
+            playClick();
+            currQIndex++;
+            if (currQIndex < questionsData.length) {
+                renderQuestion();
+            } else {
+                showQuizResult();
+            }
+        }
+
+        function showQuizResult() {
+            document.getElementById('quiz-play').classList.remove('flex');
+            document.getElementById('quiz-play').classList.add('hidden');
+            
+            const resScreen = document.getElementById('quiz-result-screen');
+            resScreen.classList.remove('hidden');
+            resScreen.classList.add('flex');
+            
+            document.getElementById('final-score').innerText = pScore;
+            const title = document.getElementById('result-title');
+            const icon = document.getElementById('result-icon');
+            
+            if (audioCtxStarted) {
+                quizBgmSeq.stop();
+                normalBgmSeq.start(); 
+                Tone.Transport.bpm.rampTo(110, 1);
+            }
+
+            if (pScore === 100) {
+                title.innerText = "SEMPURNA!";
+                title.className = "font-heading text-6xl md:text-7xl mb-6 text-success animate-pulse";
+                icon.innerText = "👑";
+                if(audioCtxStarted) {
+                    const now = Tone.now();
+                    winSynth.triggerAttackRelease(["C4", "E4", "G4"], "8n", now);
+                    winSynth.triggerAttackRelease(["F4", "A4", "C5"], "8n", now + 0.2);
+                    winSynth.triggerAttackRelease(["G4", "B4", "D5"], "8n", now + 0.4);
+                    winSynth.triggerAttackRelease(["C5", "E5", "G5", "C6"], "2n", now + 0.6);
+                }
+                speak("Wah luar biasa! Nilai kamu seratus sempurna! Kamu jagoan teks diskusi!");
+            } else if (pScore >= 70) {
+                title.innerText = "HEBAT SEKALI!";
+                title.className = "font-heading text-6xl md:text-7xl mb-6 text-secondary";
+                icon.innerText = "🚀";
+                if(audioCtxStarted) winSynth.triggerAttackRelease(["C4", "E4", "G4", "C5"], "1n");
+                speak("Hebat sekali! Sedikit lagi sempurna, terus belajar ya!");
+            } else {
+                title.innerText = "YUK BELAJAR LAGI!";
+                title.className = "font-heading text-6xl md:text-7xl mb-6 text-primary";
+                icon.innerText = "💪";
+                speak("Jangan menyerah! Ayo baca materinya lagi dan coba kuisnya lagi!");
+            }
+        }
+
+        function resetQuizState() {
+            playClick();
+            document.getElementById('quiz-result-screen').classList.remove('flex');
+            document.getElementById('quiz-result-screen').classList.add('hidden');
+            document.getElementById('quiz-intro').classList.remove('hidden');
+            document.getElementById('score-display').innerText = "0";
+            speak("Mari kita mulai lagi!");
+        }
+
+    </script>
+</body>
+</html>
